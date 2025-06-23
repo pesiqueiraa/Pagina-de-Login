@@ -33,6 +33,48 @@ class UserController {
         }
 
     }
+
+    //POST /users/login -- Login de usuário
+    static async loginUser(req, res) {
+        const { email, password } = req.body;
+        try {
+            if (!email || !password) { 
+                return res.status(400).json({
+                    success: false,
+                    message: 'Email e senha são obrigatórios'
+                });
+            }
+
+            const user = await User.findByEmail(email);
+            if (!user) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Usuário não encontrado'
+                });
+            }
+            if (user.password !== password) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Senha incorreta'
+                });
+            }
+
+            res.status(200).json({
+                success: true,
+                message: 'Login bem-sucedido',
+                user: {
+                    id: user.id,
+                    username: user.username
+                }
+            });
+        } catch (error) {
+            console.error('Erro ao fazer login:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro ao fazer login'
+            });
+        } 
+    }
 }
 
 module.exports = UserController;
